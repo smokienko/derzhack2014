@@ -1,13 +1,11 @@
 package com.smokiyenko.burokrat.app;
 
-import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseBurokratActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,4 +32,10 @@ public class LoginActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+//    @SuppressWarnings("Unused")
+//    //TODO Fix callback when login is ready
+//    public void onEventOnMainThread(){
+//
+//    }
 }
