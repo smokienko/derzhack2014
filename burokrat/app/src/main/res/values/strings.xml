@@ -4,5 +4,10 @@
     <string name="app_name">burokrat</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Login</string>
+    <string name="login_passport_series_hint">Passwor Series</string>
+    <string name="login_passport_id_hint">Password ID</string>
+    <string name="login_button_name">Login</string>
+
+
 
 </resources>

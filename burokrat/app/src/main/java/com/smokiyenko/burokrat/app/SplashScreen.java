@@ -15,7 +15,7 @@ public class SplashScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Start Login Activity
+        //Start Login BaseBurokratActivity
         final Handler handler = new Handler();
         final Runnable activityStartRunnable = new Runnable() {
             @Override

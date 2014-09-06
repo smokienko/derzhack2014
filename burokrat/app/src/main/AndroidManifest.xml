@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.smokiyenko.burokrat.app" >
+          package="com.smokiyenko.burokrat.app">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+            android:name=".BurokratApplication"
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
 
 
         <activity
-            android:name="com.smokiyenko.burokrat.app.SplashScreen"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
+                android:name="com.smokiyenko.burokrat.app.SplashScreen"
+                android:label="@string/app_name"
+                android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name="com.smokiyenko.burokrat.app.LoginActivity"
-            android:label="@string/title_activity_login"
-            android:icon="@drawable/icon_app"
-            android:theme="@android:style/Theme.Holo.Light">
+                android:name="com.smokiyenko.burokrat.app.LoginActivity"
+                android:label="@string/title_activity_login"
+                android:icon="@drawable/icon_app"
+                android:theme="@android:style/Theme.Holo.Light">
         </activity>
     </application>
 
