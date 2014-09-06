@@ -24,7 +24,9 @@
         </activity>
         <activity
             android:name="com.smokiyenko.burokrat.app.LoginActivity"
-            android:label="@string/title_activity_login" >
+            android:label="@string/title_activity_login"
+            android:icon="@drawable/icon_app"
+            android:theme="@android:style/Theme.Holo.Light">
         </activity>
     </application>
 
