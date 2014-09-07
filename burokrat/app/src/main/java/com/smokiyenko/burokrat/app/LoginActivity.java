@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import de.greenrobot.event.EventBus;
 
 
 public class LoginActivity extends BaseBurokratActivity {
@@ -26,14 +29,19 @@ public class LoginActivity extends BaseBurokratActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //    @SuppressWarnings("Unused")
-    //    //TODO Fix callback when login is ready
-    //    public void onEventOnMainThread(){
-    //
-    //    }
+        @SuppressWarnings("Unused")
+        public void onEventMainThread(final SessionResponse session){
+            BurokratApplication.getEventBus().unregister(this);
+            BurokratApplication.getEventBus().postSticky(session);
+            startActivity(new Intent(this, MainActivity.class));
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        }
 
     public void onLoginPressed(final View view) {
-        startActivity(new Intent(this, MainActivity.class));
-        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+//        startActivity(new Intent(this, MainActivity.class));
+//        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        TextView tvPassportId = (TextView) findViewById(R.id.login_passport_id);
+        TextView tvPassportSeries = (TextView) findViewById(R.id.login_passport_series);
+        BurokratApplication.getClient().login(tvPassportSeries.getText().toString() , tvPassportId.getText().toString());
     }
 }

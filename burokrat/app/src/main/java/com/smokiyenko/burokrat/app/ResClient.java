@@ -2,6 +2,11 @@ package com.smokiyenko.burokrat.app;
 
 import android.util.Log;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 
 import de.greenrobot.event.EventBus;
@@ -14,9 +19,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 /**
  * Created by s.mokiyenko on 9/6/14.
@@ -25,23 +28,23 @@ public class ResClient implements Closeable {
 
     private final EventBus eventBus;
 
-    private final ThreadPoolExecutor requestRunner = new ThreadPoolExecutor(1, 1, 5000, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(5));
+    private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1));
 
     public enum RequestUrl {
-        LOGIN(""),
-        SEARCH(""),
+        LOGIN("getUser"),
+        SEARCH("getDocks"),
         QUEUE("");
 
         private final String requestUrl;
         //TODO add Server url
-        private final static String SERVER_URL = "";
+        private final static String SERVER_URL = "http://gs-rest-service2.cfapps.io/";
 
         RequestUrl(final String requestUrl) {
             this.requestUrl = requestUrl;
         }
 
-        public URL getRequestURL() throws MalformedURLException {
-            return new URL(SERVER_URL.concat(requestUrl));
+        public URL getRequestURL(final String body) throws MalformedURLException {
+            return new URL(SERVER_URL.concat(requestUrl).concat(body));
         }
 
     }
@@ -55,7 +58,7 @@ public class ResClient implements Closeable {
         private final RESTRequest request;
         private final RequestUrl requestUrl;
 
-        private InternalHttpCall(final RESTRequest restRequest, final RequestUrl requestUrl){
+        private InternalHttpCall(final RESTRequest restRequest, final RequestUrl requestUrl) {
             this.request = restRequest;
             this.requestUrl = requestUrl;
         }
@@ -65,12 +68,11 @@ public class ResClient implements Closeable {
         public void run() {
             final HttpURLConnection urlConnection;
             try {
-                urlConnection = (HttpURLConnection) requestUrl.getRequestURL().openConnection();
+                urlConnection = (HttpURLConnection) requestUrl.getRequestURL(request.getBody()).openConnection();
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
                 urlConnection.setRequestMethod(request.getRequestType().toString());
-                if (request.getBody() != null) {
-                   final OutputStream outputStream = urlConnection.getOutputStream();
-                    outputStream.write(request.getBody().getBytes("UTF-8"));
-                }
+
                 final int responseCode = HttpUrlConnectionSupport.retrieveResponseCode(urlConnection);
 
                 final String result;
@@ -83,7 +85,8 @@ public class ResClient implements Closeable {
                 }
                 parseResponse(result);
             } catch (final Exception ex) {
-                Log.e("ResClient", "InternalHttpCall exception", ex );
+                Log.e("ResClient", "InternalHttpCall exception", ex);
+                throw new RuntimeException(ex);
             }
         }
 
@@ -114,24 +117,59 @@ public class ResClient implements Closeable {
     }
 
 
-    public void login(final String passportSeries, final String passportId){
+    public void login(final String passportSeries, final String passportId) {
 
-        final String body = String.format("passportSeries=%s,passportSeries=%s",passportId,passportSeries);
-        final RESTRequest request = new RESTRequest.Builder().setBody(body).setType(RESTRequest.RequestType.POST).build();
+        final String body = String.format("?passportSeries=%s&passportId=%s", passportSeries, passportId);
+        final RESTRequest request = new RESTRequest.Builder().setBody(body).setType(RESTRequest.RequestType.GET).build();
 
-        final InternalHttpCall httpCall = new InternalHttpCall(request,RequestUrl.LOGIN) {
+        final InternalHttpCall httpCall = new InternalHttpCall(request, RequestUrl.LOGIN) {
             @Override
             void parseResponse(String json) {
                 Gson gson = new Gson();
+                final SessionResponse session = gson.fromJson(json, SessionResponse.class);
+                eventBus.postSticky(session);
             }
         };
+        addCall(httpCall);
 
-        requestRunner.submit(httpCall);
+    }
+
+    public void getDocksList(final SessionResponse sessionResponse) {
+        final String body = String.format("?jsessionid=%s", sessionResponse.getJsessionid());
+        final RESTRequest request = new RESTRequest.Builder().setBody(body).setType(RESTRequest.RequestType.GET).build();
+
+        final InternalHttpCall httpCall = new InternalHttpCall(request, RequestUrl.LOGIN) {
+            @Override
+            void parseResponse(String json) {
+                Gson gson = new Gson();
+                final DocumentsListResponse documentsListResponse = gson.fromJson(json, DocumentsListResponse.class);
+                eventBus.post(documentsListResponse);
+            }
+        };
+        addCall(httpCall);
+    }
+
+    private void addCall(final InternalHttpCall call){
+        final ListenableFuture future = service.submit(call);
+
+        Futures.addCallback(future, new FutureCallback() {
+            @Override
+            public void onSuccess(final Object result) {
+                Log.d("RestClient", "onSuccess");
+                //We have allredy posted result to event bus
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e("RestClient", "onFailure", t);
+                eventBus.post(new RestError(t.getMessage()));
+            }
+        });
     }
 
 
     @Override
     public void close() throws IOException {
-        requestRunner.shutdownNow();
+        service.shutdownNow();
     }
 }

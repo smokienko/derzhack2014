@@ -10,14 +10,20 @@ import de.greenrobot.event.EventBus;
 public class BurokratApplication extends Application {
 
     private static EventBus eventBus;
+    private static ResClient client;
 
     @Override
     public void onCreate() {
         super.onCreate();
         eventBus = new EventBus();
+        client = new ResClient(eventBus);
     }
 
     public static EventBus getEventBus() {
         return eventBus;
+    }
+
+    public static ResClient getClient() {
+        return client;
     }
 }

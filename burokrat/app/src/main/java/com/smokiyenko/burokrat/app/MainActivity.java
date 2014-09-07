@@ -1,11 +1,10 @@
 package com.smokiyenko.burokrat.app;
 
 import android.app.Activity;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,19 +22,26 @@ public class MainActivity extends Activity implements DocumentFragment.OnFragmen
                                             "Документ 8",
                                             "Документ 9",
                                             "Документ 10"};
+    private SessionResponse session;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        session = BurokratApplication.getEventBus().getStickyEvent(SessionResponse.class);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null){
             DocumentFragment fragment = DocumentFragment.newInstance();
             final ArrayList<String> documents = new ArrayList<String>();
             documents.addAll(Arrays.asList(documentNames));
             fragment.setDocuments(documents);
-            getFragmentManager().beginTransaction().add(R.id.fragment_container,fragment).commit();
+            getFragmentManager().beginTransaction().add(R.id.fragment_container,fragment,"doc").commit();
         }
+    }
+
+    @SuppressWarnings("Unused")
+    public void onEventMainThread(final DocumentsListResponse documentsListResponse){
+       getFragmentManager().getFragment(null,"doc");
     }
 
 
@@ -65,6 +71,8 @@ public class MainActivity extends Activity implements DocumentFragment.OnFragmen
         }
         return true;
     }
+
+
 
 
     @Override
