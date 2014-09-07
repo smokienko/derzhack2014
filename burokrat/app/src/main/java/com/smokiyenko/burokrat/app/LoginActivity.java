@@ -1,8 +1,9 @@
 package com.smokiyenko.burokrat.app;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 public class LoginActivity extends BaseBurokratActivity {
@@ -11,14 +12,6 @@ public class LoginActivity extends BaseBurokratActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.login, menu);
-        return true;
     }
 
     @Override
@@ -33,9 +26,14 @@ public class LoginActivity extends BaseBurokratActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    @SuppressWarnings("Unused")
-//    //TODO Fix callback when login is ready
-//    public void onEventOnMainThread(){
-//
-//    }
+    //    @SuppressWarnings("Unused")
+    //    //TODO Fix callback when login is ready
+    //    public void onEventOnMainThread(){
+    //
+    //    }
+
+    public void onLoginPressed(final View view) {
+        startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
 }
